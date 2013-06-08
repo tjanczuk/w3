@@ -1,11 +1,59 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title><%= title %></title>
-    <link rel='stylesheet' href='/stylesheets/style.css' />
+    <% include head.common.ejs %>
+    <style>
+        textarea 
+        {
+            resize: none;
+        }
+        body
+        {
+            margin-top: 20px;
+        }
+    </style>
   </head>
   <body>
-    <h1><%= title %></h1>
-    <p>Welcome to <%= title %></p>
+    <div class="container">
+      <div class="row">
+        <div class="span2">
+            <img src="images/w3.png" alt="What Where When"/>
+        </div>
+        <div class="span10">
+            <form>
+                <label>What, where and when (<a href="#">examples</a>)</label>
+                <textarea rows="3" placeholder="Text with #tags, @time, and $location" class="input-block-level"></textarea>
+                <!-- <span class="help-block"><a href="#">Show examples</a></span> -->
+                <div class="control-group">
+                    <button type="button" class="btn">Search</button>
+                    <button type="button" class="btn">Post</button>
+                    <button type="button" class="btn">Locate me</button>
+                </div>
+            </form>
+            <!-- <form class="form-horizontal">
+                <div class="control-group">
+                    <label class="control-label" for="what">What</label>
+                    <div class="controls">
+                        <input type="text" id="what" placeholder="Your message or #tags">
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label" for="where">Where</label>
+                    <div class="controls input-append">
+                        <input type="text" id="where" placeholder="Location...">
+                        <button type="button" class="btn">Find me!</button>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label" for="when">When</label>
+                    <div class="controls">
+                        <input type="text" id="when" placeholder="Date, time, or range">
+                    </div>
+                </div>
+                <button type="submit" class="btn">Search</button>
+            </form> -->
+        </div>
+      </div>        
+    </div>
   </body>
 </html>
