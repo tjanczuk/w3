@@ -2,6 +2,7 @@
 <html>
   <head>
     <% include head.common.ejs %>
+
     <style>
         textarea 
         {
@@ -11,49 +12,53 @@
         {
             margin-top: 20px;
         }
+        #mapcanvas
+        {
+            height: 500px;
+        }
     </style>
+
+    <script type="text/javascript"
+      src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDbtMHdwtaStpZ_TWDdJmWopkdInyWwyaQ&sensor=false">
+    </script>
+    <script>
+
+      function initialize() {
+        var mapOptions = {
+          center: new google.maps.LatLng(48, -122),
+          zoom: 8,
+          mapTypeId: google.maps.MapTypeId.ROADMAP
+        };
+
+        var map = new google.maps.Map(document.getElementById("mapcanvas"), mapOptions);
+      }
+
+      google.maps.event.addDomListener(window, 'load', initialize);
+
+    </script>
   </head>
   <body>
     <div class="container">
       <div class="row">
-        <div class="span2">
+        <!-- <div class="span2">
             <img src="images/w3.png" alt="What Where When"/>
-        </div>
-        <div class="span10">
+        </div> -->
+        <div class="span8 offset2">
             <form>
-                <label>What, where and when (<a href="#">examples</a>)</label>
-                <textarea rows="3" placeholder="Text with #tags, @time, and $location" class="input-block-level"></textarea>
-                <!-- <span class="help-block"><a href="#">Show examples</a></span> -->
+                <label class="lead">What, Where and When (<a href="#">examples</a>)</label>
+                <textarea rows="3" placeholder="Text with #tags, @people, ^time, and $location" class="input-block-level"></textarea>
                 <div class="control-group">
                     <button type="button" class="btn">Search</button>
                     <button type="button" class="btn">Post</button>
                     <button type="button" class="btn">Locate me</button>
                 </div>
             </form>
-            <!-- <form class="form-horizontal">
-                <div class="control-group">
-                    <label class="control-label" for="what">What</label>
-                    <div class="controls">
-                        <input type="text" id="what" placeholder="Your message or #tags">
-                    </div>
-                </div>
-                <div class="control-group">
-                    <label class="control-label" for="where">Where</label>
-                    <div class="controls input-append">
-                        <input type="text" id="where" placeholder="Location...">
-                        <button type="button" class="btn">Find me!</button>
-                    </div>
-                </div>
-                <div class="control-group">
-                    <label class="control-label" for="when">When</label>
-                    <div class="controls">
-                        <input type="text" id="when" placeholder="Date, time, or range">
-                    </div>
-                </div>
-                <button type="submit" class="btn">Search</button>
-            </form> -->
         </div>
-      </div>        
+      </div>  
+      <div class="row" >
+        <div class="span8 offset2" id="mapcanvas">
+        </div>
+      </div>      
     </div>
   </body>
 </html>
