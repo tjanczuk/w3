@@ -33,7 +33,7 @@
             mapTypeId: google.maps.MapTypeId.ROADMAP
         };
 
-        function locateMe(insert) {
+        function locateMe() {
             var success = function (position) {
                 var mapPosition =  new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
                 if (!map) {
@@ -47,20 +47,22 @@
                 }
                 else {
                     map.setCenter(mapPosition);
+                    map.setZoom(10);
                 }
 
-                if (insert) {
-                    var location = ' $(' + Math.round(position.coords.latitude * 10000) / 10000 + 
-                        ',' + Math.round(position.coords.longitude * 10000) / 10000 + ') ';
-                    var message = $('#message').text() + location;
-                    $('#message').text(message);
-                }
+                // if (insert) {
+                //     var location = ' $(' + Math.round(position.coords.latitude * 10000) / 10000 + 
+                //         ',' + Math.round(position.coords.longitude * 10000) / 10000 + ') ';
+                //     var message = $('#message').text() + location;
+                //     $('#message').text(message);
+                // }
             };
 
             var error = function (msg) {
-                alert(typeof msg === 'string' ? msg : 'Unable to determine current location.');
-                $('#locateMe').hide();
-                showMap(defaultMapOptions);
+                var message = 'Unable to determine current location.';
+                if (typeof msg === 'object' && typeof msg.message === 'string')
+                    message += ' ' + msg.message;
+                alert(message);
             };
 
             navigator.geolocation.getCurrentPosition(success, error, { timeout: 10000 });
@@ -71,38 +73,91 @@
         }
 
         $(function () {
+            showMap(defaultMapOptions);
             if (navigator.geolocation) {
-                $('#locateMe').show().click(function () { locateMe(true); });
-                locateMe(false);
-            }
-            else {
-                showMap(defaultMapOptions);
+                $('#locateMe').click(locateMe);
+                locateMe();
             }
         });
     </script>
   </head>
   <body>
+    <div id="help" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+            <h3 id="myModalLabel">Markup help</h3>
+        </div>
+        <div class="modal-body">
+            <table class="table table-condensed">
+                <tr>
+                    <td>$here</td>
+                    <td>your current location</td>
+                </tr>
+                <tr>
+                    <td>$(48.2, -121.4)</td>
+                    <td>48.2 N, 121.4 W (latitude,longitude)</td>
+                </tr>
+                <tr>
+                    <td>$(Pike Place Market, Seattle, WA)</td>
+                    <td>well: Pike Place Market, Seattle, WA</td>
+                </tr>                
+                <tr>
+                    <td>^now</td>
+                    <td>your current date and time</td>
+                </tr>
+                <tr>
+                    <td>^today</td>
+                    <td>current date (no time)</td>
+                </tr>
+                <tr>
+                    <td>^tomorrow</td>
+                    <td>tomorrow</td>
+                </tr>
+                <tr>
+                    <td>^yesterday</td>
+                    <td>you guessed it - yesterday</td>
+                </tr>
+                <tr>
+                    <td>^6/8/2013</td>
+                    <td>June 8th, 2013 (month/day/year)</td>
+                </tr>
+                <tr>
+                    <td>^6/8/2013T14:20</td>
+                    <td>June 8th, 2013, 2:20pm in your local time zone</td>
+                </tr>
+                <tr>
+                    <td>^6/8/2013T14:20-9</td>
+                    <td>June 8th, 2013, 2:20pm in GMT-9</td>
+                </tr>
+            </table>
+        </div>
+    </div>
     <div class="container">
-      <div class="row">
-        <!-- <div class="span2">
-            <img src="images/w3.png" alt="What Where When"/>
-        </div> -->
-        <div class="span8 offset2">
-            <form>
-                <label class="lead">What, Where and When (<a href="#">examples</a>)</label>
+        <div class="row">
+            <div class="span8 offset2">
+                <span class="lead"><strong>What, Where and When</strong></span>
+                <a href="#help" role="button" data-toggle="modal">(help with markup)</a>
+            </div>
+        </div>
+        <div class="row">
+            <div class="span8 offset2">
                 <textarea rows="3" id="message" placeholder="Text with #tags, @people, ^time, and $location" class="input-block-level"></textarea>
-                <div class="control-group">
-                    <button type="button" class="btn">Search</button>
-                    <button type="button" class="btn">Post</button>
-                    <button type="button" class="btn w3-hide" id="locateMe">Current location</button>
+                <div class="btn-toolbar">
+                    <div class="btn-group">
+                        <a href="#" class="btn btn-primary">Search</a>
+                        <a href="#" class="btn btn-info">Post</a>
+                    </div>
+                    <div class="form-search btn-group">
+                        <input type="text" class="input-large search-query" placeholder="My current location">
+                        <a href="#" class="btn" id="locateMe">Show</a>
+                    </div>
                 </div>
-            </form>
+            </div>
         </div>
-      </div>  
-      <div class="row" >
-        <div class="span8 offset2" id="mapcanvas">
-        </div>
-      </div>      
+        <div class="row" >
+            <div class="span8 offset2" id="mapcanvas">
+            </div>
+        </div>      
     </div>
   </body>
 </html>
