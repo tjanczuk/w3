@@ -16,10 +16,6 @@
         {
             height: 500px;
         }
-        .w3-hide
-        {
-            display: none;
-        }
     </style>
 
     <script type="text/javascript"
@@ -32,6 +28,39 @@
             zoom: 2,
             mapTypeId: google.maps.MapTypeId.ROADMAP
         };
+
+        var resolveLocationRequests;
+
+        function resolveLocation(success, error) {
+            var callback = function (kind) {
+                return function (data) {
+                    var tmp = resolveLocationRequests;
+                    resolveLocationRequests = undefined;
+                    for (var i in tmp) {
+                        if (tmp[i][kind]) {
+                            tmp[i][kind](data);
+                        }
+                    }
+                }
+            };
+
+            if (!navigator.geolocation) {
+                if (error) {
+                    error('Geolocation services are not supported by your browser.');
+                }
+            }
+            else {
+                // ensure only one geolocation request is active at a time
+                var request = { success: success, error: error };
+                if (!resolveLocationRequests) {
+                    resolveLocationRequests = [ request ];
+                    navigator.geolocation.getCurrentPosition(callback('success'), callback('error'), { timeout: 15000 });   
+                }
+                else {
+                    resolveLocationRequests.push(request);
+                }
+            }
+        }
 
         function locateMe() {
             var success = function (position) {
@@ -49,13 +78,6 @@
                     map.setCenter(mapPosition);
                     map.setZoom(10);
                 }
-
-                // if (insert) {
-                //     var location = ' $(' + Math.round(position.coords.latitude * 10000) / 10000 + 
-                //         ',' + Math.round(position.coords.longitude * 10000) / 10000 + ') ';
-                //     var message = $('#message').text() + location;
-                //     $('#message').text(message);
-                // }
             };
 
             var error = function (msg) {
@@ -65,15 +87,79 @@
                 alert(message);
             };
 
-            navigator.geolocation.getCurrentPosition(success, error, { timeout: 10000 });
+            resolveLocation(success, error);
         }
 
         function showMap(options) {
             map = new google.maps.Map(document.getElementById("mapcanvas"), options);
         }
 
+        function resolveHere(resolver, match, callback) {
+            resolveLocation(function (position) {
+                var location = Math.round(position.coords.latitude * 10000) / 10000 + 
+                    ',' + Math.round(position.coords.longitude * 10000) / 10000;
+                callback(resolver, match, location)
+            });
+        }
+
+        function resolveNow(resolver, match, callback) {
+            callback(resolver, match, new Date().toString());
+        }
+
+        var markupResolvers = [
+            {
+                regex: /\$\(here\)/i,
+                handler: resolveHere,
+                formatter: function (value) { return '$(' + value + ')'; }
+            },
+            {
+                regex: /\$here /i,
+                handler: resolveHere,
+                formatter: function (value) { return '$(' + value + ') '; }
+            },
+            {
+                regex: /\^\(now\)/i,
+                handler: resolveNow,
+                formatter: function (value) { return '^(' + value + ')'; }
+            },
+            {
+                regex: /\^now /i,
+                handler: resolveNow,
+                formatter: function (value) { return '^(' + value + ') '; }
+            }
+        ];
+
+        function resolveMarkup() {
+            var $message = $('#message');
+            var message = $message.val();
+            for (var i in markupResolvers) {
+                var markupResolver = markupResolvers[i];
+                var match = markupResolver.regex.exec(message);
+                if (match) {
+                    markupResolver.handler(markupResolver, match, function (markupResolver, match, replacement) {
+                        var currentMessage = $message.val();
+                        var selectionStart = $message.prop('selectionStart');
+                        var selectionEnd = $message.prop('selectionEnd');
+                        var i = currentMessage.indexOf(match[0]);
+                        if (i >= 0) {
+                            var newValue = markupResolver.formatter(replacement);
+                            var newMessage = currentMessage.replace(match[0], newValue);
+                            $message.val(newMessage);
+                            if (selectionStart > (i + match[0].length)) {
+                                $message.prop('selectionStart', selectionStart + newValue.length - match[0].length);
+                            }
+                            if (selectionEnd > (i + match[0].length)) {
+                                $message.prop('selectionEnd', selectionEnd + newValue.length - match[0].length);
+                            }
+                        }
+                    });
+                }
+            }
+        }
+
         $(function () {
             showMap(defaultMapOptions);
+            $('#message').keyup(resolveMarkup);
             if (navigator.geolocation) {
                 $('#locateMe').click(locateMe);
                 locateMe();
