@@ -23,9 +23,12 @@
     </script>
     <script>
         var map;
+        var markers = {};
+        var $message;
         var defaultMapOptions = {
             center: new google.maps.LatLng(47, -122.5),
             zoom: 2,
+            navigationControlOptions: { style: google.maps.NavigationControlStyle.SMALL },
             mapTypeId: google.maps.MapTypeId.ROADMAP
         };
 
@@ -69,6 +72,7 @@
                     var options = {
                         center: mapPosition,
                         zoom: 10,
+                        navigationControlOptions: { style: google.maps.NavigationControlStyle.SMALL },
                         mapTypeId: google.maps.MapTypeId.ROADMAP
                     };
 
@@ -103,34 +107,60 @@
         }
 
         function resolveNow(resolver, match, callback) {
-            callback(resolver, match, new Date().toString());
+            callback(resolver, match, new Date().toISOString());
+        }
+
+        function updateMap() {
+            // find all locations in message
+
+            var coordsRegex = /\$\(([\+\-]?\d+\.?\d*),([\+\-]?\d+\.?\d*)[^)]*\)/g;
+            var message = $message.val();
+            var newMarkers = {};
+            var match;
+            while ((match = coordsRegex.exec(message)) !== null) {
+                newMarkers[match[0]] = match;
+            }
+
+            // transfer existing markers, create new ones
+
+            for (var i in newMarkers) {
+                if (markers[i]) {
+                    newMarkers[i] = markers[i];
+                }
+                else {
+                    newMarkers[i] = new google.maps.Marker({
+                        position: new google.maps.LatLng(newMarkers[i][1], newMarkers[i][2]),
+                        map: map, 
+                        title: i.substring(2, i.length - 1)
+                    });
+                }
+            }
+
+            // delete removed markers
+
+            for (var i in markers) {
+                if (!newMarkers[i]) {
+                    markers[i].setMap(null);
+                }
+            }
+
+            markers = newMarkers;
         }
 
         var markupResolvers = [
             {
-                regex: /\$\(here\)/i,
+                regex: /\$here(\s)/i,
                 handler: resolveHere,
-                formatter: function (value) { return '$(' + value + ')'; }
+                formatter: function (value, match) { return '$(' + value + ')' + match[1]; }
             },
             {
-                regex: /\$here /i,
-                handler: resolveHere,
-                formatter: function (value) { return '$(' + value + ') '; }
-            },
-            {
-                regex: /\^\(now\)/i,
+                regex: /\^now(\s)/i,
                 handler: resolveNow,
-                formatter: function (value) { return '^(' + value + ')'; }
-            },
-            {
-                regex: /\^now /i,
-                handler: resolveNow,
-                formatter: function (value) { return '^(' + value + ') '; }
+                formatter: function (value, match) { return '^(' + value + ')' + match[1]; }
             }
         ];
 
-        function resolveMarkup() {
-            var $message = $('#message');
+        function processMarkup() {
             var message = $message.val();
             for (var i in markupResolvers) {
                 var markupResolver = markupResolvers[i];
@@ -142,7 +172,7 @@
                         var selectionEnd = $message.prop('selectionEnd');
                         var i = currentMessage.indexOf(match[0]);
                         if (i >= 0) {
-                            var newValue = markupResolver.formatter(replacement);
+                            var newValue = markupResolver.formatter(replacement, match);
                             var newMessage = currentMessage.replace(match[0], newValue);
                             $message.val(newMessage);
                             if (selectionStart > (i + match[0].length)) {
@@ -151,15 +181,20 @@
                             if (selectionEnd > (i + match[0].length)) {
                                 $message.prop('selectionEnd', selectionEnd + newValue.length - match[0].length);
                             }
+
+                            updateMap();
                         }
                     });
                 }
             }
+
+            updateMap();
         }
 
         $(function () {
+            $message = $('#message');
             showMap(defaultMapOptions);
-            $('#message').keyup(resolveMarkup);
+            $('#message').keyup(processMarkup);
             if (navigator.geolocation) {
                 $('#locateMe').click(locateMe);
                 locateMe();
