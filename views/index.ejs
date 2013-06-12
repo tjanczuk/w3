@@ -23,6 +23,7 @@
     </script>
     <script>
         var map;
+        var homeMarker;
         var markers = {};
         var $message;
         var defaultMapOptions = {
@@ -65,6 +66,11 @@
             }
         }
 
+        function getPositionString(position) {
+            return Math.round(position.coords.latitude * 10000) / 10000 + 
+                    ',' + Math.round(position.coords.longitude * 10000) / 10000;    
+        }
+
         function locateMe() {
             var success = function (position) {
                 var mapPosition =  new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
@@ -82,12 +88,30 @@
                     map.setCenter(mapPosition);
                     map.setZoom(10);
                 }
+
+                if (homeMarker) {
+                    homeMarker.setMap(null);
+                    homeMarker = null;
+                }
+
+                homeMarker = new google.maps.Marker({
+                    position: mapPosition,
+                    map: map, 
+                    title: 'Your location: ' + getPositionString(position),
+                    icon: 'http://mapicons.nicolasmollet.com/wp-content/uploads/mapicons/shape-default/color-8f5a22/shapecolor-color/shadow-1/border-dark/symbolstyle-white/symbolshadowstyle-dark/gradient-no/regroup.png'
+                });
             };
 
             var error = function (msg) {
                 var message = 'Unable to determine current location.';
                 if (typeof msg === 'object' && typeof msg.message === 'string')
                     message += ' ' + msg.message;
+
+                if (homeMarker) {
+                    homeMarker.setMap(null);
+                    homeMarker = null;
+                }
+                                
                 alert(message);
             };
 
@@ -100,8 +124,7 @@
 
         function resolveHere(resolver, match, callback) {
             resolveLocation(function (position) {
-                var location = Math.round(position.coords.latitude * 10000) / 10000 + 
-                    ',' + Math.round(position.coords.longitude * 10000) / 10000;
+                var location = getPositionString(position);
                 callback(resolver, match, location)
             });
         }
@@ -131,7 +154,11 @@
                     newMarkers[i] = new google.maps.Marker({
                         position: new google.maps.LatLng(newMarkers[i][1], newMarkers[i][2]),
                         map: map, 
-                        title: i.substring(2, i.length - 1)
+                        title: i.substring(2, i.length - 1),
+                        icon: 'http://mapicons.nicolasmollet.com/wp-content/uploads/mapicons/shape-default/color-f00c0c/shapecolor-color/shadow-1/border-dark/symbolstyle-white/symbolshadowstyle-dark/gradient-no/direction_down.png'
+                        // icon: 'http://mapicons.nicolasmollet.com/wp-content/uploads/mapicons/shape-default/color-9d7050/shapecolor-color/shadow-1/border-dark/symbolstyle-white/symbolshadowstyle-dark/gradient-no/direction_down.png'
+
+                        // icon: 'http://mapicons.nicolasmollet.com/wp-content/uploads/mapicons/shape-default/color-3875d7/shapecolor-color/shadow-1/border-dark/symbolstyle-white/symbolshadowstyle-dark/gradient-no/regroup.png'
                     });
                 }
             }
