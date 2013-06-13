@@ -23,6 +23,7 @@
     </script>
     <script>
         var map;
+        var geocoder;
         var homeMarker;
         var markers = {};
         var $message;
@@ -111,7 +112,7 @@
                     homeMarker.setMap(null);
                     homeMarker = null;
                 }
-                                
+
                 alert(message);
             };
 
@@ -131,6 +132,25 @@
 
         function resolveNow(resolver, match, callback) {
             callback(resolver, match, new Date().toISOString());
+        }
+
+        function resolveGeocode(resolver, match, callback) {
+            if (/^\$\([\+\-]?\d+\.?\d*,[\+\-]?\d+\.?\d*/.test(match[0])) {
+                // do not geocode locations already geocoded
+                return;
+            }
+
+            geocoder.geocode({ address: match[1] }, function (result, status) {
+                if (status === google.maps.GeocoderStatus.OK) {
+                    var newLabel = getPositionString({ 
+                        coords: { 
+                            latitude: result[0].geometry.location.lat(),
+                            longitude: result[0].geometry.location.lng()
+                        }
+                    }) + ': ' + result[0].formatted_address;
+                    callback(resolver, match, newLabel);
+                }
+            });
         }
 
         function updateMap() {
@@ -156,9 +176,6 @@
                         map: map, 
                         title: i.substring(2, i.length - 1),
                         icon: 'http://mapicons.nicolasmollet.com/wp-content/uploads/mapicons/shape-default/color-f00c0c/shapecolor-color/shadow-1/border-dark/symbolstyle-white/symbolshadowstyle-dark/gradient-no/direction_down.png'
-                        // icon: 'http://mapicons.nicolasmollet.com/wp-content/uploads/mapicons/shape-default/color-9d7050/shapecolor-color/shadow-1/border-dark/symbolstyle-white/symbolshadowstyle-dark/gradient-no/direction_down.png'
-
-                        // icon: 'http://mapicons.nicolasmollet.com/wp-content/uploads/mapicons/shape-default/color-3875d7/shapecolor-color/shadow-1/border-dark/symbolstyle-white/symbolshadowstyle-dark/gradient-no/regroup.png'
                     });
                 }
             }
@@ -184,15 +201,21 @@
                 regex: /\^now(\s)/i,
                 handler: resolveNow,
                 formatter: function (value, match) { return '^(' + value + ')' + match[1]; }
+            },
+            {
+                regex: /\$\(([^\)\n]+)\)/ig,
+                handler: resolveGeocode,
+                formatter: function (value, match) { return '$(' + value + ')'; }
             }
         ];
 
         function processMarkup() {
             var message = $message.val();
+
             for (var i in markupResolvers) {
                 var markupResolver = markupResolvers[i];
-                var match = markupResolver.regex.exec(message);
-                if (match) {
+                var match;
+                while ((match = markupResolver.regex.exec(message)) !== null) {
                     markupResolver.handler(markupResolver, match, function (markupResolver, match, replacement) {
                         var currentMessage = $message.val();
                         var selectionStart = $message.prop('selectionStart');
@@ -212,6 +235,10 @@
                             updateMap();
                         }
                     });
+                    
+                    if (!markupResolver.regex.global) {
+                        break;
+                    }
                 }
             }
 
@@ -220,6 +247,7 @@
 
         $(function () {
             $message = $('#message');
+            geocoder = new google.maps.Geocoder();
             showMap(defaultMapOptions);
             $('#message').keyup(processMarkup);
             if (navigator.geolocation) {
