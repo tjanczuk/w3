@@ -28,6 +28,7 @@
         var markers = {};
         var $message;
         var $searchLocation;
+        var $date;
         var defaultMapOptions = {
             center: new google.maps.LatLng(47, -122.5),
             zoom: 2,
@@ -142,7 +143,7 @@
                                 + ': ' + result[0].formatted_address
                         });
 
-                        $searchLocation.val('');
+                        $searchLocation.val(result[0].formatted_address);
                     }
                     else {
                         alert('Unable to find location.');
@@ -280,9 +281,11 @@
         $(function () {
             $message = $('#message');
             $searchLocation = $('#searchLocation');
+            $date = $('#date');
             geocoder = new google.maps.Geocoder();
             showMap(defaultMapOptions);
             $message.keyup(processMarkup);
+            $date.val(new Date().toISOString().slice(0, 10))
             $('#showOnMap').click(showOnMap);
             $searchLocation.keypress(function(e) {
                 if ((e.keyCode ? e.keyCode : e.which) == 13) {
@@ -338,18 +341,30 @@
             </div>
         </div>
         <div class="row">
-            <div class="span8 offset2">
+            <div class="span7 offset2">
                 <textarea rows="3" id="message" placeholder="Text with #tags, @people, ^time, and $location" class="input-block-level"></textarea>
-                <div class="btn-toolbar">
-                    <div class="btn-group">
-                        <a href="#" class="btn btn-primary">Search</a>
-                        <a href="#" class="btn btn-info">Post</a>
-                    </div>
-                    <div class="form-search btn-group">
-                        <input type="text" class="input-large search-query" placeholder="My current location" id="searchLocation">
-                        <a href="#" class="btn" id="showOnMap">Show on map</a>
-                    </div>
+            </div>
+            <div class="span1">
+                <a href="#" class="btn btn-primary btn-block" id="post">Post</a>
+            </div>
+        </div>
+        <div class="row">
+            <div class="span7 offset2">
+                <div class="form-search btn-group">
+                    <input type="text" class="input-xlarge" placeholder="My current location" id="searchLocation">
+                    <input type="date" class="input-medium" placeholder="Date" id="date"></input>
+                    <select id="dateDelta">
+                      <option>on this day only</option>
+                      <option>on this or next day</option>
+                      <option selected="selected">...and the following week</option>
+                      <option>...and the following month</option>
+                      <option>...and anytime in the future</option>
+                    </select>                    
+                    
                 </div>
+            </div>
+            <div class="span1">
+                <a href="#" class="btn btn-block" id="showOnMap">Search</a>
             </div>
         </div>
         <div class="row" >
