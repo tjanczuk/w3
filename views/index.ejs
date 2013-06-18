@@ -11,10 +11,25 @@
         body
         {
             margin-top: 20px;
+            height: 100%;
+        }
+        html 
+        {
+            height: 100%
         }
         #mapcanvas
         {
-            height: 500px;
+            height: 100%;
+            width: 100%;
+            position: absolute;
+            top: 0px;
+            left: 0px;
+        }
+        .container
+        {
+            padding: 10px;
+            background: rgb(255, 255, 255) transparent; 
+            background: rgba(255, 255, 255, 0.8); 
         }
     </style>
 
@@ -157,6 +172,13 @@
 
         function showMap(options) {
             map = new google.maps.Map(document.getElementById("mapcanvas"), options);
+            var w3mapcontrol = document.getElementById('w3mapcontrol');
+            var container = document.getElementById('container');
+            var controlDiv = document.createElement('div');
+            w3mapcontrol.removeChild(container);
+            controlDiv.appendChild(container);
+            controlDiv.index = 50;
+            map.controls[google.maps.ControlPosition.TOP_CENTER].push(controlDiv);
         }
 
         function resolveHere(resolver, match, callback) {
@@ -283,7 +305,6 @@
             $searchLocation = $('#searchLocation');
             $date = $('#date');
             geocoder = new google.maps.Geocoder();
-            showMap(defaultMapOptions);
             $message.keyup(processMarkup);
             $date.val(new Date().toISOString().slice(0, 10))
             $('#showOnMap').click(showOnMap);
@@ -299,10 +320,14 @@
             else {
                 $searchLocation.prop('placeholder', 'Location to find');
             }
+
+            showMap(defaultMapOptions);
         });
     </script>
   </head>
   <body>
+    <div id="mapcanvas">
+    </div>    
     <div id="help" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
         <div class="modal-header">
             <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
@@ -333,44 +358,42 @@
             </table>
         </div>
     </div>
-    <div class="container">
-        <div class="row">
-            <div class="span8 offset2">
-                <span class="lead"><strong>What, Where and When</strong></span>
-                <a href="#help" role="button" data-toggle="modal">(help with markup)</a>
-            </div>
-        </div>
-        <div class="row">
-            <div class="span7 offset2">
-                <textarea rows="3" id="message" placeholder="Text with #tags, @people, ^time, and $location" class="input-block-level"></textarea>
-            </div>
-            <div class="span1">
-                <a href="#" class="btn btn-primary btn-block" id="post">Post</a>
-            </div>
-        </div>
-        <div class="row">
-            <div class="span7 offset2">
-                <div class="form-search btn-group">
-                    <input type="text" class="input-xlarge" placeholder="My current location" id="searchLocation">
-                    <input type="date" class="input-medium" placeholder="Date" id="date"></input>
-                    <select id="dateDelta">
-                      <option>on this day only</option>
-                      <option>on this or next day</option>
-                      <option selected="selected">...and the following week</option>
-                      <option>...and the following month</option>
-                      <option>...and anytime in the future</option>
-                    </select>                    
-                    
+    <div class="hidden" id="w3mapcontrol">
+        <div class="container" id="container">
+            <div class="row">
+                <div class="span8">
+                    <span class="lead"><strong>What, Where and When</strong></span>
+                    <a href="#help" role="button" data-toggle="modal">(help with markup)</a>
                 </div>
             </div>
-            <div class="span1">
-                <a href="#" class="btn btn-block" id="showOnMap">Search</a>
+            <div class="row">
+                <div class="span7">
+                    <textarea rows="3" id="message" placeholder="Text with #tags, @people, ^time, and $location" class="input-block-level"></textarea>
+                </div>
+                <div class="span1">
+                    <a href="#" class="btn btn-primary btn-block" id="post">Post</a>
+                </div>
+            </div>
+            <div class="row">
+                <div class="span7">
+                    <div class="btn-group">
+                        <input type="text" class="input-xlarge" placeholder="My current location" id="searchLocation">
+                        <input type="date" class="input-medium" placeholder="Date" id="date"></input>
+                        <select id="dateDelta">
+                          <option>on this day only</option>
+                          <option>on this or next day</option>
+                          <option selected="selected">...and the following week</option>
+                          <option>...and the following month</option>
+                          <option>...and anytime in the future</option>
+                        </select>                    
+                        
+                    </div>
+                </div>
+                <div class="span1">
+                    <a href="#" class="btn btn-block" id="showOnMap">Search</a>
+                </div>
             </div>
         </div>
-        <div class="row" >
-            <div class="span8 offset2" id="mapcanvas">
-            </div>
-        </div>      
     </div>
   </body>
 </html>
