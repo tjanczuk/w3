@@ -150,7 +150,7 @@ The endpoint returns HTTP 400 status code when the submitted query is invalid. T
 
 The endpoint returns HTTP 500 status code when querying the database fails. The body of the response contains details of the error.
 
-The endpoint returns HTTP 200 status code when the query was successfuly persisted in the database. The body of the HTTP response contains `application/json` representation of the array representing query results. For example, given the following request:
+The endpoint returns HTTP 200 status code when the query was successful. The body of the HTTP response in that case contains `application/json` representation of the array representing query results. For example, given the following request:
 
 ```
 {
