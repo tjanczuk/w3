@@ -28,6 +28,7 @@ if ('development' == app.get('env')) {
 
 app.get('/', routes.index);
 app.post('/api/v1/messages', express.limit(140), apis.textBodyParser(), apis.postMessage);
+app.post('/api/v1/query', express.limit(1024), express.bodyParser(), apis.searchMessages);
 
 http.createServer(app).listen(app.get('port'), function(){
   console.log('Express server listening on port ' + app.get('port'));

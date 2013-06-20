@@ -1,5 +1,6 @@
 var assert = require('assert')
-    , db = require('../lib/db.js');
+    , db = require('../lib/db.js')
+    , config = require('../lib/config.js');
 
 function extractAll(regexp, text) {
     var result = [];
@@ -116,7 +117,48 @@ exports.postMessage = function(req, res){
             res.send(500, JSON.stringify(error, null, 2));
         }
         else {
+            messages.forEach(function (message) {
+                message.id = message._id;
+                delete message._id;
+            });
+
             res.json(201, messages);
+        }
+    });
+};
+
+exports.searchMessages = function(req, res){
+    var query = req.body;
+    console.log(query);
+    try {
+        assert.ok(typeof query === 'object', 'The query must be a JSON object.');
+        assert.ok(typeof query.geometry === 'object', 'The query.geometry must be a geoJSON Polygon object.');
+        assert.ok(query.geometry.type === 'Polygon', 'The query.geometry must be a geoJSON Polygon object.');
+        assert.ok(Array.isArray(query.geometry.coordinates), 'The query.geometry must be a geoJSON Polygon object.');
+        assert.ok(typeof query.time === 'object', 'The query.time must be a JSON object.');
+        assert.ok(query.time.type === 'Period', 'Unsupported query.time.type value. Only Period is supported.');
+        assert.ok(Array.isArray(query.time.time), 'The query.time.time must be an array with two integers.');
+        assert.ok(!isNaN(query.time.time[0]), 'The query.time.time must be an array with two integers.');
+        assert.ok(!isNaN(query.time.time[1]), 'The query.time.time must be an array with two integers.');
+    }
+    catch (e) {
+        return res.send(400, e.message);
+    }
+
+    db.queryMessages(query, function (error, result) {
+        if (error) {
+            res.send(500, JSON.stringify(error, null, 2));
+        }
+        else if (result.length > config.maxQueryLimit) {
+            res.send(400, 'Number of query results exceeded the limit.');
+        }
+        else {
+            result.forEach(function (message) {
+                message.id = message._id;
+                delete message._id;
+            });
+
+            res.json(200, result);
         }
     });
 };
