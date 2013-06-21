@@ -45,12 +45,15 @@
         var geocoder;
         var homeMarker;
         var markers = {};
+        var searchResults = {};
         var $message;
         var $searchLocation;
         var $date;
+        var $dateDelta;
         var $post;
         var $postError;
         var $postErrorMessage;
+
         var defaultMapOptions = {
             center: new google.maps.LatLng(47, -122.5),
             zoom: 2,
@@ -186,6 +189,7 @@
             controlDiv.appendChild(container);
             controlDiv.index = 50;
             map.controls[google.maps.ControlPosition.TOP_CENTER].push(controlDiv);
+            google.maps.event.addListener(map, 'idle', searchMessages);
         }
 
         function resolveHere(resolver, match, callback) {
@@ -323,13 +327,67 @@
 
                 markers = {};
                 $message.val('');
+                searchMessages();
             }).fail(function (xhr, status, error) {
                 $postErrorMessage.text(xhr.responseText || status || error);
                 $postError.show();
             }).always(function () {
                 $('#posting').modal('hide');
                 $('body').css('cursor', 'default');
-            })
+            });
+        }
+
+        function searchMessages() {
+            var ne = map.getBounds().getNorthEast();
+            var sw = map.getBounds().getSouthWest();
+            var fromTime = Date.parse($date.val());
+            var toTime = fromTime + +($dateDelta.val());
+
+            var query = {
+                geometry: {
+                    type: 'Polygon',
+                    coordinates: [[ [sw.lng(), sw.lat()], [ne.lng(), sw.lat()], [ne.lng(), ne.lat()], 
+                        [sw.lng(), ne.lat()], [sw.lng(), sw.lat()]]]
+                },
+                time: {
+                    type: 'Period',
+                    time: [ fromTime, toTime ]
+                }
+            };
+
+            $.ajax({
+                url: '/api/v1/query',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(query),
+                timeout: 30000
+            }).done(function (data, status, xhr) {
+                // add new results to the map
+                var currentResults = {};
+                data.forEach(function (message) {
+                    currentResults[message.id] = true;
+                    if (!searchResults[message.id]) {
+                        searchResults[message.id] = message;
+                        message.marker = new google.maps.Marker({
+                            position: new google.maps.LatLng(message.location.coordinates[1], message.location.coordinates[0]),
+                            map: map, 
+                            title: message.text
+                            // icon: 'images/direction_down.png'
+                        });                        
+                    }
+                });
+
+                // remove markers out of bands from the map
+                for (var id in searchResults) {
+                    if (!currentResults[id]) {
+                        searchResults[id].marker.setMap(null);
+                        delete searchResults[id];
+                    }
+                }
+            }).fail(function (xhr, status, error) {
+                $postErrorMessage.text(xhr.responseText || status || error);
+                $postError.show();
+            });            
         }
 
         $(function () {
@@ -337,12 +395,15 @@
             $message = $('#message');
             $searchLocation = $('#searchLocation');
             $date = $('#date');
+            $dateDelta = $('#dateDelta');
             $postError = $('#postError');
             $postErrorMessage = $('#postErrorMessage');
 
             geocoder = new google.maps.Geocoder();
             $message.keyup(processMarkup);
-            $date.val(new Date().toISOString().slice(0, 10))
+            $date.val(new Date().toISOString().slice(0, 10));
+            $date.bind('input', searchMessages);
+            $dateDelta.change(searchMessages);
             $('#showOnMap').click(showOnMap);
             $post.click(postMessage);
             $searchLocation.keypress(function(e) {
@@ -429,17 +490,17 @@
                         <input type="text" class="input-xlarge" placeholder="My current location" id="searchLocation">
                         <input type="date" class="input-medium" placeholder="Date" id="date"></input>
                         <select id="dateDelta">
-                          <option>on this day only</option>
-                          <option>on this or next day</option>
-                          <option selected="selected">...and the following week</option>
-                          <option>...and the following month</option>
-                          <option>...and anytime in the future</option>
+                          <option value="86400000">on this day only</option>
+                          <option value="172800000">on this or next day</option>
+                          <option selected="selected" value="604800000">...and the following week</option>
+                          <option value="2678400000">...and the following month</option>
+                          <option value="Infinity">...and anytime in the future</option>
                         </select>                    
                         
                     </div>
                 </div>
                 <div class="span1">
-                    <a href="#" class="btn btn-block" id="showOnMap">Search</a>
+                    <a href="#" class="btn btn-block" id="showOnMap">Refresh</a>
                 </div>
             </div>
         </div>

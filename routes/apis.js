@@ -36,8 +36,6 @@ function parseMessage(message) {
             location_name: match[3]
         };
 
-        console.log(location);
-
         if (location.location.coordinates[0] < -180 || location.location.coordinates[0] > 180
             || location.location.coordinates[1] < -90 || location.location.coordinates[1] > 90) {
             throw new Error('Invalid coordinates.')
@@ -131,7 +129,6 @@ exports.postMessage = function(req, res){
 
 exports.searchMessages = function(req, res){
     var query = req.body;
-    console.log(query);
     try {
         assert.ok(typeof query === 'object', 'The query must be a JSON object.');
         assert.ok(typeof query.geometry === 'object', 'The query.geometry must be a geoJSON Polygon object.');
