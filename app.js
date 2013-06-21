@@ -7,7 +7,8 @@ var express = require('express')
   , routes = require('./routes/index.js')
   , apis = require('./routes/apis.js')
   , http = require('http')
-  , path = require('path');
+  , path = require('path')
+  , config = require('./lib/config.js');
 
 var app = express();
 
@@ -27,8 +28,8 @@ if ('development' == app.get('env')) {
 }
 
 app.get('/', routes.index);
-app.post('/api/v1/messages', express.limit(140), apis.textBodyParser(), apis.postMessage);
-app.post('/api/v1/query', express.limit(1024), express.bodyParser(), apis.searchMessages);
+app.post('/api/v1/messages', express.limit(config.maxMessageSize), apis.textBodyParser(), apis.postMessage);
+app.post('/api/v1/query', express.limit(config.maxQuerySize), express.bodyParser(), apis.searchMessages);
 
 http.createServer(app).listen(app.get('port'), function(){
   console.log('Express server listening on port ' + app.get('port'));

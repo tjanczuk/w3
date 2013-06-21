@@ -31,6 +31,10 @@
             background: rgb(255, 255, 255) transparent; 
             background: rgba(255, 255, 255, 0.8); 
         }
+        #posting
+        {
+            cursor: wait;
+        }
     </style>
 
     <script type="text/javascript"
@@ -44,6 +48,9 @@
         var $message;
         var $searchLocation;
         var $date;
+        var $post;
+        var $postError;
+        var $postErrorMessage;
         var defaultMapOptions = {
             center: new google.maps.LatLng(47, -122.5),
             zoom: 2,
@@ -300,14 +307,44 @@
             updateMap();
         }
 
+        function postMessage() {
+            $('#posting').modal({ keyboard: false, backdrop: 'static' });
+            $('body').css('cursor', 'wait');
+            $.ajax({
+                url: '/api/v1/messages',
+                type: 'POST',
+                contentType: 'text/plain',
+                data: $message.val(),
+                timeout: 30000
+            }).done(function (data, status, xhr) {
+                for (var i in markers) {
+                    markers[i].setMap(null);
+                }
+
+                markers = {};
+                $message.val('');
+            }).fail(function (xhr, status, error) {
+                $postErrorMessage.text(xhr.responseText || status || error);
+                $postError.show();
+            }).always(function () {
+                $('#posting').modal('hide');
+                $('body').css('cursor', 'default');
+            })
+        }
+
         $(function () {
+            $post = $('#post');
             $message = $('#message');
             $searchLocation = $('#searchLocation');
             $date = $('#date');
+            $postError = $('#postError');
+            $postErrorMessage = $('#postErrorMessage');
+
             geocoder = new google.maps.Geocoder();
             $message.keyup(processMarkup);
             $date.val(new Date().toISOString().slice(0, 10))
             $('#showOnMap').click(showOnMap);
+            $post.click(postMessage);
             $searchLocation.keypress(function(e) {
                 if ((e.keyCode ? e.keyCode : e.which) == 13) {
                     showOnMap();
@@ -322,12 +359,16 @@
             }
 
             showMap(defaultMapOptions);
+
+            $postError.hide();
         });
     </script>
   </head>
   <body>
     <div id="mapcanvas">
     </div>    
+    <div id="posting" class="modal hide" tabindex="-1" role="dialog" aria-hidden="true">
+    </div>
     <div id="help" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
         <div class="modal-header">
             <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
@@ -372,6 +413,14 @@
                 </div>
                 <div class="span1">
                     <a href="#" class="btn btn-primary btn-block" id="post">Post</a>
+                </div>
+            </div>
+            <div class="row">
+                <div class="span7">
+                    <div class="alert alert-error" id="postError">
+                        <a class="close" onclick="$('#postError').hide()">×</a>
+                        <span id="postErrorMessage"></span>
+                    </div>
                 </div>
             </div>
             <div class="row">

@@ -31,10 +31,12 @@ function parseMessage(message) {
         var location = {
             location: {
                 type: 'Point',
-                coordinates: [ +match[1], +match[2] ]
+                coordinates: [ +match[2], +match[1] ]
             },
             location_name: match[3]
         };
+
+        console.log(location);
 
         if (location.location.coordinates[0] < -180 || location.location.coordinates[0] > 180
             || location.location.coordinates[1] < -90 || location.location.coordinates[1] > 90) {

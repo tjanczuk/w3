@@ -1,1 +1,1 @@
-Test message $(-120,50: My favorite fishing spot) $(20,20: My second best) ^(2013-06-19) ^(2014-06-20) #fishing /cc @theworld @tjanczuk
+Test message $(50,-120: My favorite fishing spot) $(20,20: My second best) ^(2013-06-19) ^(2014-06-20) #fishing /cc @theworld @tjanczuk

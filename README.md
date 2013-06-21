@@ -27,7 +27,7 @@ The content type of the HTTP request must contain the message to be posted as `t
 For example, this is a valid request body:
 
 ```
-Test message $(-120,24: My favorite fishing spot) $(20,21: My second best) ^(2013-06-19) ^(2013-06-20) 
+Test message $(24,-120: My favorite fishing spot) $(21,20: My second best) ^(2013-06-19) ^(2013-06-20) 
 #fishing /cc @theworld @tjanczuk
 ```
 
@@ -44,7 +44,7 @@ The endpoint returns HTTP 500 status code when inserting to the database fails. 
 The endpoint returns HTTP 201 status code when the message was successfuly persisted in the database. The body of the HTTP response contains `application/json` representation of the normalized array of entries inserted into the database. For example, given the following request:
 
 ```
-Test message $(-120,24: My favorite fishing spot) ^(2013-06-19) ^(2013-06-20) 
+Test message $(24,-120: My favorite fishing spot) ^(2013-06-19) ^(2013-06-20) 
 #fishing /cc @theworld @tjanczuk
 ```
 
