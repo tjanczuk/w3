@@ -263,3 +263,9 @@ The same query issued to production system:
 ```
 curl http://w3.surla.mobi/api/v1/query --header "Content-Type: application/json" --data-binary @query1.json
 ```
+
+To execute the database setup script which sets up appropriate indexes (from root of project):
+
+```
+mongo dharma.mongohq.com:10033/w3 -u w3 -p cdd66d02385c4ed19177d1d4247735b8 ./tools/setup_db.js 
+```
