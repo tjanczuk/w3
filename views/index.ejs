@@ -463,9 +463,16 @@
     <div class="hidden" id="w3mapcontrol">
         <div class="container" id="container">
             <div class="row">
-                <div class="span8">
-                    <span class="lead"><strong>What, Where and When</strong></span>
-                    <a href="#help" role="button" data-toggle="modal">(help with markup)</a>
+                <div class="span4">
+                    <p><strong>What, Where and When</strong>
+                    <a href="#help" role="button" data-toggle="modal"><i class="icon-question-sign"></i></a></p>
+                </div>
+                <div class="span3 text-right">
+                    <% if (isAuthenticated) { %>
+                    Welcome, <%= user.name %> - <a href="/logout">Logout</a>
+                    <% } else { %>
+                    <a href="/login">Login</a>
+                    <% } %>
                 </div>
             </div>
             <div class="row">

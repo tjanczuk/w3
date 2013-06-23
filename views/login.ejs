@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <% include head.common.ejs %> 
+    <style>
+        #twitter
+        {
+            cursor: pointer;
+        }
+    </style>
+    <script>
+        $(function () {
+            $('#login').modal({
+                keyboard: false, 
+                backdrop: 'static'
+            });
+        });
+    </script>
+  </head>
+  <body>
+    <div id="login" class="modal hide fade" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-header">
+            <h3 class="text-center">Welcome, Stranger</h3>
+        </div>
+        <div class="modal-body text-center">
+            <p>Log in using any method as long as it is Twitter</p>
+            <a href="/login/twitter"><img src="images/twitter.png" alt="Sign in with twitter" id="twitter"/></a>
+        </div>
+    </div>
+  </body>
+</html>
