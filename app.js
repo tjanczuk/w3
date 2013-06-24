@@ -41,20 +41,28 @@ passport.use(new TwitterStrategy({
     }
 ));  
 
-function ensureAuthenticated(req, res, next) {
-    if (req.isAuthenticated()) { 
-        return next(); 
-    }
+function ensureAuthenticated(failfast) {
+    return function (req, res, next) {
+        if (req.isAuthenticated()) { 
+            return next(); 
+        }
+        else if (typeof config.apiKey !== 'undefined' && config.apiKey === req.query.apiKey) {
+            req.apiAccessAuthenticated = true;
+            return next();
+        }
 
-    res.redirect('/login')
+        failfast ? res.send(401) : res.redirect('/login');
+    }
 }
 
-function ensureAuthorized(req, res, next) {
-    if (config.betaUsers.some(function (user) { return user === req.user.id; })) {
-        return next(); 
-    }
+function ensureAuthorized(failfast) {
+    return function ensureAuthorized(req, res, next) {
+        if (req.apiAccessAuthenticated || config.betaUsers.some(function (user) { return user === req.user.id; })) {
+            return next(); 
+        }
 
-    res.redirect('/beta')
+        failfast ? res.send(403) : res.redirect('/beta');
+    }
 }
 
 var app = express();
@@ -88,15 +96,15 @@ app.get('/login/twitter/callback',
 app.get('/beta', 
     routes.beta);
 app.get('/logout', 
-    ensureAuthenticated, 
+    ensureAuthenticated(), 
     routes.logout);
 app.get('/', 
-    ensureAuthenticated, 
-    ensureAuthorized, 
+    ensureAuthenticated(), 
+    ensureAuthorized(), 
     routes.index);
 app.all('/api/*', 
-    ensureAuthenticated,
-    ensureAuthorized,
+    ensureAuthenticated(true),
+    ensureAuthorized(true),
     routes.addCommonResponseHeaders);
 app.post('/api/v1/messages', 
     express.limit(config.maxMessageSize), 

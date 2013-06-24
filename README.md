@@ -10,10 +10,13 @@ What Where When
 To post new messages to the system, use this endpoint:
 
 ```
-POST /api/v1/messages
+POST /api/v1/messages?apiKey={apiKey}
 ```
 
-Currently the endpoint is not authenticated, but it will be.
+The endpoint requires authentication and authorization in one of two forms:
+
+* the browser user had been authenticated using one of the authentication methods (e.g. Twitter) and the cookie based session attests that. In addition, currently the system enforces that the authenticated user is in the whitelist specified as a comma separated list of screen names in the `W3_BETA_USERS` environment variable.    
+* the call explicitly specifies the `apiKey` query parameter. Currently the system allows for a single apiKey to specified as `W3_API_KEY` environment variable.  
 
 #### Request body 
 
@@ -114,10 +117,10 @@ the response should look as follows:
 To query messages, use this endpoint: 
 
 ```
-POST /api/v1/query
+POST /api/v1/query?apiKey={apiKey}
 ```
 
-The endpoint does not require authentication.
+Currently the endpoint requires authentication using the same mechanism as the `POST /api/v1/message` endpoint. Long term the endpoint will be unauthenticated. 
 
 #### Request body
 
@@ -243,25 +246,25 @@ mongo dharma.mongohq.com:10033/w3 -u w3 -p cdd66d02385c4ed19177d1d4247735b8
 Post a message from the `message1.txt` file to the system listening on `http://localhost:3000` from command line:
 
 ```
-curl http://localhost:3000/api/v1/messages --data-binary @message1.txt
+curl http://localhost:3000/api/v1/messages?apiKey=gow3go --data-binary @message1.txt
 ```
 
 The same to the production system:
 
 ```
-curl http://w3.surla.mobi/api/v1/messages --data-binary @message1.txt
+curl http://w3.surla.mobi/api/v1/messages?apiKey=gow3go --data-binary @message1.txt
 ```
 
 To issue a query in `query1.json` file to the system listening on `http://localhost:3000` from command line:
 
 ```
-curl http://localhost:3000/api/v1/query --header "Content-Type: application/json" --data-binary @query1.json
+curl http://localhost:3000/api/v1/query?apiKey=gow3go --header "Content-Type: application/json" --data-binary @query1.json
 ```
 
 The same query issued to production system:
 
 ```
-curl http://w3.surla.mobi/api/v1/query --header "Content-Type: application/json" --data-binary @query1.json
+curl http://w3.surla.mobi/api/v1/query?apiKey=gow3go --header "Content-Type: application/json" --data-binary @query1.json
 ```
 
 To execute the database setup script which sets up appropriate indexes (from root of project):
