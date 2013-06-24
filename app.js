@@ -37,7 +37,6 @@ passport.use(new TwitterStrategy({
         callbackURL: 'http://w3.surla.mobi/login/twitter/callback'
     },
     function(token, tokenSecret, profile, done) {
-        console.log(profile);
         return done(null, profile);
     }
 ));  
@@ -95,15 +94,15 @@ app.get('/',
     ensureAuthenticated, 
     ensureAuthorized, 
     routes.index);
+app.all('/api/*', 
+    ensureAuthenticated,
+    ensureAuthorized,
+    routes.addCommonResponseHeaders);
 app.post('/api/v1/messages', 
-    ensureAuthenticated, 
-    ensureAuthorized, 
     express.limit(config.maxMessageSize), 
     apis.textBodyParser(), 
     apis.postMessage);
 app.post('/api/v1/query', 
-    ensureAuthenticated, 
-    ensureAuthorized, 
     express.limit(config.maxQuerySize), 
     express.bodyParser(), 
     apis.searchMessages);

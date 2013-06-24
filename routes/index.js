@@ -23,3 +23,10 @@ exports.logout = function(req, res) {
 exports.beta = function (req, res) {
     res.render('beta', { user: req.user, isAuthenticated: req.isAuthenticated() });
 }
+
+exports.addCommonResponseHeaders = function (req, res, next) {
+    res.set('Cache-Control', 'no-cache');
+    res.set('Access-Control-Allow-Methods', 'POST');
+    res.set('Access-Control-Allow-Origin', '*');
+    next();
+};
