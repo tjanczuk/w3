@@ -161,3 +161,9 @@ exports.searchMessages = function(req, res){
         }
     });
 };
+
+exports.addCommonApiHeaders = function(req, res, next) {
+    res.set('Cache-Control', 'no-cache');
+    res.set('Access-Control-Allow-Origin', '*');
+    next();
+};

@@ -86,6 +86,8 @@ if ('development' == app.get('env')) {
   app.use(express.errorHandler());
 }
 
+app.options('*', 
+    routes.corsResponse);
 app.get('/login', 
     routes.login); // shows login page
 app.get('/login/twitter', 
@@ -102,17 +104,15 @@ app.get('/',
     ensureAuthenticated(), 
     ensureAuthorized(), 
     routes.index);
-app.all('/api/*', 
-    ensureAuthenticated(true),
-    ensureAuthorized(true),
-    routes.addCommonResponseHeaders);
 app.post('/api/v1/messages', 
     express.limit(config.maxMessageSize), 
     apis.textBodyParser(), 
+    apis.addCommonApiHeaders,
     apis.postMessage);
 app.post('/api/v1/query', 
     express.limit(config.maxQuerySize), 
     express.bodyParser(), 
+    apis.addCommonApiHeaders,
     apis.searchMessages);
 
 http.createServer(app).listen(app.get('port'), function(){

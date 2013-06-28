@@ -24,9 +24,10 @@ exports.beta = function (req, res) {
     res.render('beta', { user: req.user, isAuthenticated: req.isAuthenticated() });
 }
 
-exports.addCommonResponseHeaders = function (req, res, next) {
+exports.corsResponse = function (req, res, next) {
     res.set('Cache-Control', 'no-cache');
-    res.set('Access-Control-Allow-Methods', 'POST');
+    res.set('Access-Control-Allow-Methods', 'POST, OPTIONS');
+    res.set('Access-Control-Allow-Headers', req.get('Access-Control-Request-Headers') || '*');
     res.set('Access-Control-Allow-Origin', '*');
-    next();
+    res.send(200, '');
 };
