@@ -40,8 +40,10 @@
     <script type="text/javascript"
       src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDbtMHdwtaStpZ_TWDdJmWopkdInyWwyaQ&sensor=false">
     </script>
+    <script type="text/javascript" src="js/markerclusterer.min.js"></script>
     <script>
         var map;
+        var clusterer;
         var geocoder;
         var homeMarker;
         var markers = {};
@@ -190,6 +192,7 @@
             controlDiv.index = 50;
             map.controls[google.maps.ControlPosition.TOP_CENTER].push(controlDiv);
             google.maps.event.addListener(map, 'idle', searchMessages);
+            clusterer = new MarkerClusterer(map);
         }
 
         function resolveHere(resolver, match, callback) {
@@ -239,10 +242,11 @@
                 else {
                     newMarkers[i] = new google.maps.Marker({
                         position: new google.maps.LatLng(newMarkers[i][1], newMarkers[i][2]),
-                        map: map, 
                         title: i.substring(2, i.length - 1),
                         icon: 'images/direction_down.png'
                     });
+
+                    clusterer.addMarker(newMarkers[i]);
                 }
             }
 
@@ -250,7 +254,7 @@
 
             for (var i in markers) {
                 if (!newMarkers[i]) {
-                    markers[i].setMap(null);
+                    clusterer.removeMarker(markers[i]);
                 }
             }
 
@@ -370,20 +374,22 @@
                         searchResults[message.id] = message;
                         message.marker = new google.maps.Marker({
                             position: new google.maps.LatLng(message.location.coordinates[1], message.location.coordinates[0]),
-                            map: map, 
                             title: message.text
                             // icon: 'images/direction_down.png'
-                        });                        
+                        });
+
+                        clusterer.addMarker(message.marker);          
                     }
                 });
 
                 // remove markers out of bands from the map
                 for (var id in searchResults) {
                     if (!currentResults[id]) {
-                        searchResults[id].marker.setMap(null);
+                        clusterer.removeMarker(searchResults[id].marker);
                         delete searchResults[id];
                     }
                 }
+                
             }).fail(function (xhr, status, error) {
                 $postErrorMessage.text(xhr.responseText || status || error);
                 $postError.show();
