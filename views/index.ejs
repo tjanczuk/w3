@@ -35,6 +35,10 @@
         {
             cursor: wait;
         }
+        #mapcanvas img
+        {
+            max-width: none;
+        }
     </style>
 
     <script type="text/javascript"
@@ -389,7 +393,7 @@
                         delete searchResults[id];
                     }
                 }
-                
+
             }).fail(function (xhr, status, error) {
                 $postErrorMessage.text(xhr.responseText || status || error);
                 $postError.show();
