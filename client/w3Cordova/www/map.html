@@ -1,0 +1,92 @@
+﻿<!DOCTYPE html>
+<html>
+    <head>
+        <title>W3</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <script type="text/javascript" src="http://ecn.dev.virtualearth.net/mapcontrol/mapcontrol.ashx?v=7.0"></script>
+        <script src="http://code.jquery.com/jquery-latest.js"></script>
+        <script src="http://code.jquery.com/ui/1.10.3/jquery-ui.min.js"></script>         
+        <script type="text/javascript" src="js/w3.js"></script>
+        <script type="text/javascript" src="js/PointBasedClustering.js"></script>
+        <script>
+            function initMap() {
+                bingMap.init('myMap', function () {
+                    bingMap.loadMap(
+                        {
+                            credentials: 'AvsbwP6vkQILmvCPZHPJf_JaSUp2u3rTVr9G6fjdbddRqa7JN2SyfAyajHb4bvCf',
+                            mapTypeId: Microsoft.Maps.MapTypeId.road,
+                            showDashboard: true,
+                            showMapTypeSelector: true,
+                            showBreadcrumb: false,
+                            zoom: 7,
+                            theme: new Microsoft.Maps.Themes.BingTheme()
+                        }, true,bingMap.loadW3Events);
+                }
+                );
+            };
+
+            function changeOpacity() {
+                bingMap.setPushpinOpacity();
+            };
+
+            function ajax() {
+                bingMap.loadW3Events();
+            };
+
+            $(function () {
+
+                $("#slider-range").slider({
+
+                    range: true,
+
+                    min: 0,
+
+                    max: 500,
+
+                    values: [75, 300],
+
+                    slide: function (event, ui) {
+
+                        $("#amount").val("$" + ui.values[0] + " - $" + ui.values[1]);
+
+                    }
+
+                });
+
+                $("#amount").val("$" + $("#slider-range").slider("values", 0) +
+
+                  " - $" + $("#slider-range").slider("values", 1));
+
+            });
+
+
+        </script>
+        
+        <style>
+            .infobox-info {
+                max-height: 200px;
+                overflow-y: auto;
+                overflow-x: hidden;
+            }
+        </style>
+    </head>
+    <body id="stage" class="theme" onload="initMap();">
+  
+      <div id='myMap' style="position:relative;width:100%;height:500px;"></div>
+      <div>
+          <input type="button" value="Opacity" onclick="changeOpacity();" />
+      </div>
+        <p>
+
+  <label for="amount">Price range:</label>
+
+  <input type="text" id="amount" style="border: 0; color: #f6931f; font-weight: bold;" />
+
+</p>
+
+ 
+
+<div id="slider-range"></div>
+
+
+  </body></html>

@@ -1,0 +1,30 @@
+﻿.infobox-info {
+    max-height: 135px;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+.infobox-body {
+    max-height: 250px;
+}
+.Infobox2 {
+    top:-15px;
+    width:200px;
+    height:200px;
+}
+ 
+.w3pushpinInRange {
+    opacity:1.0;
+}
+.w3pushpinOutsideRange{
+    opacity:0.5;
+}
+
+#footer{
+     position: absolute;
+     bottom: 0;
+/*     height:80px; */
+     width:100%;
+     background:rgba(167, 167, 167,0.5);
+
+}
