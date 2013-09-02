@@ -1,6 +1,0 @@
-C:\dev\W3\W3\bin\W3.dll.config
-C:\dev\W3\W3\bin\W3.dll
-C:\dev\W3\W3\bin\W3.pdb
-C:\dev\W3\W3\obj\Debug\W3.csprojResolveAssemblyReference.cache
-C:\dev\W3\W3\obj\Debug\W3.dll
-C:\dev\W3\W3\obj\Debug\W3.pdb
