@@ -1,0 +1,119 @@
+﻿<!DOCTYPE html>
+<html>
+    <head>
+        <title>W3</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <script type="text/javascript" src="http://ecn.dev.virtualearth.net/mapcontrol/mapcontrol.ashx?v=7.0"></script>
+        <script src="http://code.jquery.com/jquery-latest.js"></script> 
+        <script src="http://code.jquery.com/ui/1.10.3/jquery-ui.min.js"></script> 
+        <link rel="stylesheet" href="http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css" />
+        <link href="css/bootstrap.min.css" rel="stylesheet" />
+        <link rel="stylesheet" href="css/iThing.css" type="text/css" />
+        <link rel="stylesheet" href="css/w3Theme.css" type="text/css" />
+        <link href="css/bootstrap-glyphicons.css" rel="stylesheet" />
+        <link href="css/messi.min.css" rel="stylesheet" />
+        <script type="text/javascript" src="js/w3.js"></script>
+        <script type="text/javascript" src="js/PointBasedClustering.js"></script>
+        <script src="js/jQDateRangeSlider-withRuler-min.js"></script>
+        <script src="js/bootstrap.min.js"></script>
+        <script src="js/messi.min.js"></script>
+         <script>
+
+
+            var w3map = new w3Theme('myMap');
+
+            function initMap() {
+                    w3map.loadMap(
+                        {
+                            credentials: 'AvsbwP6vkQILmvCPZHPJf_JaSUp2u3rTVr9G6fjdbddRqa7JN2SyfAyajHb4bvCf',
+                            mapTypeId: Microsoft.Maps.MapTypeId.road,
+                            showDashboard: true,
+                            showMapTypeSelector: true,
+                            showBreadcrumb: false,
+                            zoom: 7//,
+                            //theme: new Microsoft.Maps.Themes.BingTheme()
+                        }, true,w3map.loadW3Events);
+            };
+
+            function showPopup() {
+            };
+            $(function () {
+                $("#datepicker").datepicker();
+            });
+        </script>
+        
+    </head>
+    <body id="stage" class="theme" onload="initMap();">
+     <div id="wrap">
+        <div class="container">
+            <div id='myMap' class="row" ></div>
+        </div>
+      </div>
+      <div id="footer">
+      <div class="container">
+          <div class="row">
+            <div class="col-lg-1">1</div>
+            <div class="col-lg-1">1</div>
+            <div class="col-lg-8">
+               <div id="dateSlider"></div>
+                </div>
+            <div class="col-lg-1">
+                <a href="#" onclick="showPopup();"> 
+                 <span class="glyphicon glyphicon-resize-horizontal"></span>
+                </a>
+              <br />
+                <span class="glyphicon glyphicon-search"></span></div>
+            <div class="col-lg-1"><p>Date: <input type="text" id="datepicker" /></p></div>
+
+        </div>
+          </div>
+          </div>
+        <script>
+            var months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sept", "Oct", "Nov", "Dec"];
+            var weekDays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+            var now = new Date();
+            var fourMonths = new Date(new Date().setDate(now.getDate() + 120));
+            var oneMonth = new Date(new Date().setDate(now.getDate() + 30));
+            $("#dateSlider").dateRangeSlider({
+                arrow: false,
+                bounds:
+            {
+                min: new Date(new Date().setDate(now.getDate()-7)),
+                max: fourMonths
+            },
+                formatter: function (val) {
+                    var days = val.getDate(),
+                    month = val.getMonth() + 1,
+                    year = val.getFullYear();
+                    return weekDays[val.getDay()] + " - " + month + "/" + days + "/" + year;
+                },
+                range: {
+                    min: { days: 1 }
+                },
+                defaultValues: {
+                    min: now,
+                    max: oneMonth
+                },
+                scales: [{
+                    first: function (value) { return value; },
+                    end: function (value) { return value; },
+                    next: function (value) {
+                        var next = new Date(value);
+                        return new Date(next.setMonth(value.getMonth() + 1));
+                    },
+                    label: function (value) {
+                        return months[value.getMonth()];
+                    },
+                    format: function (tickContainer, tickStart, tickEnd) {
+                        tickContainer.addClass("myCustomClass");
+                    }
+                }]
+            });
+            $("#dateSlider").bind("valuesChanged", function (e, data) {
+                console.log("Values just changed. min: " + data.values.min + " max: " + data.values.max);
+                w3map.updatePushpins(data.values.min, data.values.max);
+            });
+
+        </script>
+   </body></html>
