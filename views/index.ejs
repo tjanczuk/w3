@@ -47,6 +47,7 @@
     <script type="text/javascript" src="js/markerclusterer.min.js"></script>
     <script>
         var map;
+        var infoWindow;
         var clusterer;
         var geocoder;
         var homeMarker;
@@ -197,7 +198,9 @@
             controlDiv.index = 50;
             map.controls[google.maps.ControlPosition.TOP_CENTER].push(controlDiv);
             google.maps.event.addListener(map, 'idle', searchMessages);
-            clusterer = new MarkerClusterer(map);
+            clusterer = new MarkerClusterer(map, [], { zoomOnClick: false });
+            google.maps.event.addListener(clusterer, 'clusterclick', displayClusterInfo);
+            infoWindow = new google.maps.InfoWindow();
         }
 
         function resolveHere(resolver, match, callback) {
@@ -247,7 +250,7 @@
                 else {
                     newMarkers[i] = new google.maps.Marker({
                         position: new google.maps.LatLng(newMarkers[i][1], newMarkers[i][2]),
-                        title: i.substring(2, i.length - 1),
+                        // title: i.substring(2, i.length - 1),
                         icon: 'images/direction_down.png'
                     });
 
@@ -331,7 +334,7 @@
                 timeout: 30000
             }).done(function (data, status, xhr) {
                 for (var i in markers) {
-                    markers[i].setMap(null);
+                    clusterer.removeMarker(markers[i]);
                 }
 
                 markers = {};
@@ -344,6 +347,37 @@
                 $('#posting').modal('hide');
                 $('body').css('cursor', 'default');
             });
+        }
+
+        function getMessageInfoHtml(message) {
+            var html = document.createTextNode(message.text);
+            return html.textContent;
+        }
+
+        function displayClusterInfo(cluster) {
+            if (!cluster.infoContent) {
+                cluster.infoContent = '<table>';
+                cluster.getMarkers().forEach(function (marker) {
+                    if (marker.message) {
+
+                        cluster.infoContent += '<tr><td>' + getMessageInfoHtml(marker.message) + '</td></tr>';
+                    }
+                });
+                cluster.infoContent += '</table>';
+            }
+
+            infoWindow.setPosition(cluster.getCenter());
+            infoWindow.setContent(cluster.infoContent);
+            infoWindow.open(map);
+        }
+
+        function displayMarkerInfo(message) {
+            if (!message.infoContent) {
+                message.infoContent = getMessageInfoHtml(message);
+            }
+
+            infoWindow.setContent(message.infoContent);
+            infoWindow.open(map, message.marker);
         }
 
         function searchMessages() {
@@ -379,8 +413,11 @@
                         searchResults[message.id] = message;
                         message.marker = new google.maps.Marker({
                             position: new google.maps.LatLng(message.location.coordinates[1], message.location.coordinates[0]),
-                            title: message.text
-                            // icon: 'images/direction_down.png'
+                        });
+                        message.marker.message = message;
+
+                        google.maps.event.addListener(message.marker, 'click', function () {
+                            displayMarkerInfo(message);
                         });
 
                         clusterer.addMarker(message.marker);          
