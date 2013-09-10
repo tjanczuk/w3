@@ -449,7 +449,7 @@
 
             geocoder = new google.maps.Geocoder();
             $message.keyup(processMarkup);
-            $date.val(new Date().toISOString().slice(0, 10));
+            $date.val(new Date('2013-01-01').toISOString().slice(0, 10));
             $date.bind('input', searchMessages);
             $dateDelta.change(searchMessages);
             $('#showOnMap').click(showOnMap);
@@ -547,9 +547,9 @@
                         <select id="dateDelta">
                           <option value="86400000">on this day only</option>
                           <option value="172800000">on this or next day</option>
-                          <option selected="selected" value="604800000">...and the following week</option>
+                          <option value="604800000">...and the following week</option>
                           <option value="2678400000">...and the following month</option>
-                          <option value="Infinity">...and anytime in the future</option>
+                          <option selected="selected" value="Infinity">...and anytime in the future</option>
                         </select>                    
                         
                     </div>
